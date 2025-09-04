@@ -1,0 +1,19 @@
+sequenceDiagram
+    actor U as Usuário/Front
+    participant L as API Loja
+    participant C as API Central
+    participant DB as DB Central
+    participant T as SNS
+    participant Q as SQS (1..N)
+    participant W as Worker Loja
+    participant DL as DLQ
+
+    U->>L: POST /local/adjust {storeId, sku, delta, seq}
+    L->>C: POST /central/adjust {storeId, sku, delta, seq}
+    C->>DB: update(sku, delta) [idempotente por seq]
+    C->>T: publish(StockUpdated)
+    T->>Q: fan-out para filas das lojas
+    Q-->>W: mensagem (at-least-once)
+    W->>W: de-dupe/idempotência (seq)
+    W->>L: aplica no DB local
+    Q-->>DL: (se falhar após retries) → DLQ

@@ -1,0 +1,189 @@
+version: "3.9"
+
+services:
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    environment:
+      - SERVICES=sns,sqs
+      - AWS_DEFAULT_REGION=us-east-1
+      - DEBUG=0
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./localstack/init:/etc/localstack/init/ready.d
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "awslocal sns list-topics >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  central:
+    build: ./apicentral
+    container_name: central
+    environment:
+      - server.port=8081
+      # Central aponta para o LocalStack via hostname do compose
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.topic-arn=arn:aws:sns:us-east-1:000000000000:inventory-updates
+      - app.events.publisher=sns
+    depends_on:
+      localstack:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+
+  # === 10 lojas (mesma imagem, variáveis por instância) ===
+  loja01:
+    build: ./loja
+    container_name: loja01
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-01
+    depends_on:
+      central:
+        condition: service_started
+    ports:
+      - "8082:8082"
+
+  loja02:
+    build: ./loja
+    container_name: loja02
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-02
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8083:8082" ]
+
+  loja03:
+    build: ./loja
+    container_name: loja03
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-03
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8084:8082" ]
+
+  loja04:
+    build: ./loja
+    container_name: loja04
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-04
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8085:8082" ]
+
+  loja05:
+    build: ./loja
+    container_name: loja05
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-05
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8086:8082" ]
+
+  loja06:
+    build: ./loja
+    container_name: loja06
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-06
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8087:8082" ]
+
+  loja07:
+    build: ./loja
+    container_name: loja07
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-07
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8088:8082" ]
+
+  loja08:
+    build: ./loja
+    container_name: loja08
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-08
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8089:8082" ]
+
+  loja09:
+    build: ./loja
+    container_name: loja09
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-09
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8090:8082" ]
+
+  loja10:
+    build: ./loja
+    container_name: loja10
+    environment:
+      - server.port=8082
+      - central.base-url=http://central:8081
+      - central.http.connect-timeout-ms=300
+      - central.http.read-timeout-ms=500
+      - aws.region=us-east-1
+      - aws.endpoint=http://localstack:4566
+      - aws.queue-url=http://localstack:4566/000000000000/inv-loja-10
+    depends_on: { central: { condition: service_started } }
+    ports: [ "8091:8082" ]
+
+  jmeter:
+    image: alpine/jmeter:5.6.3
+    depends_on: [loja01]
+    volumes:
+      - ./jmeter:/test
+    working_dir: /test
+    entrypoint: ["sh","-c"]
+    command: ["jmeter -n -t /test/load.jmx -l /test/results.jtl -e -o /test/report"]
+
