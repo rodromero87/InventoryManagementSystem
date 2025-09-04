@@ -4,6 +4,7 @@ import com.inventario.apicentral.domain.port.in.GetInventoryQuery;
 import com.inventario.apicentral.domain.port.out.InventoryRepository;
 import com.inventario.apicentral.shared.dto.InventoryDTO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
@@ -13,6 +14,7 @@ public class GetInventoryService implements GetInventoryQuery {
     private final InventoryRepository repo;
     public GetInventoryService(InventoryRepository repo){ this.repo = repo; }
 
+    @Transactional(readOnly = true)
     @Override
     public InventoryDTO getBySku(String sku) {
         return repo.findBySkuForUpdate(sku)

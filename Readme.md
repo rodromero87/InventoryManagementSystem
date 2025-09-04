@@ -130,7 +130,7 @@ A solução foi dividida em **dois serviços principais**:
 
 ---
 
-## ▶️ Execução com Maven
+## ▶️ Execução com Docker
 
 De permissao para execução do 10-init-sns-sqs.sh, ele vai configurar o sns e filas no localstack
 
@@ -141,7 +141,15 @@ chmod +x localstack/init/10-init-sns-sqs.sh
 
 O projeto está dockerizado, por padrao será iniciada 10 lojas e uma api central
 
-```docker compose up -d
+```
+docker compose up -d
+
+```
+
+Para acompanhar os logs 
+
+```
+ docker compose logs -f --tail=100 central loja{01..10}
 ```
 
 
@@ -152,6 +160,22 @@ O projeto está dockerizado, por padrao será iniciada 10 lojas e uma api centra
 
 * `POST /local/adjust` → Alteração de inventário.
 * `GET /inventory/{sku}` → Consulta de inventário.
+
+### Massa para teste
+
+```
+curl --request POST \
+  --url http://localhost:8082/local/adjust \
+  --header 'Content-Type: application/json' \
+  --data '{"storeId":"LOJA01","sku":"ABC-123","delta":100,"seq":1}'
+
+```
+
+```
+curl --request GET \
+  --url http://localhost:8081/inventory/ABC-123 '
+
+```
 
 ---
 
